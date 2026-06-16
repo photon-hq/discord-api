@@ -1,0 +1,95 @@
+name: Update Discord OpenAPI
+
+on:
+  schedule:
+    # Daily, away from the top of the hour to reduce GitHub scheduler delays.
+    - cron: "37 9 * * *"
+  workflow_dispatch:
+
+# PR creation and auto-merge use a GitHub App token (org-wide APP_ID /
+# APP_PRIVATE_KEY secrets): the org blocks Actions from opening PRs, and PRs
+# created with GITHUB_TOKEN would not trigger the release workflow on merge.
+permissions:
+  contents: read
+
+concurrency:
+  group: update-discord-openapi
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the committed spec at HEAD to compute the API-surface diff.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.19
+
+      - run: bun install --frozen-lockfile
+
+      - name: Vendor OpenAPI spec from discord/discord-api-spec
+        run: bun run generate:openapi
+
+      # Run the full pipeline as a PR check so a broken upstream change can never
+      # reach npm: the same steps gate the release workflow on merge.
+      - name: Generate client + build
+        run: |
+          bun run generate:client
+          bun run build
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Lint
+        run: bun run check
+
+      - name: Compute API surface diff
+        id: surface
+        run: |
+          # Write outside the repo: a report file in the working tree would get
+          # committed into the PR and produce a spec-less update.
+          bun run diff:surface > "$RUNNER_TEMP/surface.md"
+          echo "breaking=$(grep -q '\*\*Breaking:\*\* yes' "$RUNNER_TEMP/surface.md" && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Create or update pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: chore/update-discord-openapi
+          delete-branch: true
+          commit-message: "chore: update Discord OpenAPI"
+          title: "chore: update Discord OpenAPI"
+          body-path: ${{ runner.temp }}/surface.md
+          labels: discord-spec-update
+          # Only the spec belongs in the PR — it must change for the release
+          # workflow's path filter to fire. No spec change → no PR.
+          add-paths: specs/discord-api.openapi.json
+
+      # Optional hands-off publishing: when AUTO_MERGE is enabled and the change
+      # is additive-only, enable auto-merge so the release workflow runs on merge.
+      # Breaking changes (removed operations/schemas) always require manual review.
+      - name: Enable auto-merge for additive-only updates
+        if: >-
+          steps.cpr.outputs.pull-request-operation != 'none' &&
+          steps.surface.outputs.breaking == 'false' &&
+          vars.AUTO_MERGE == 'true'
+        env:
+          # App token, not github.token: a merge enabled by GITHUB_TOKEN would
+          # not trigger the release workflow's push event on main.
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: gh pr merge --auto --squash "${{ steps.cpr.outputs.pull-request-number }}"

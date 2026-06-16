@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // The published client targets the standard web platform (fetch/Request/
+    // Response), not Bun specifically — use DOM libs and drop the Bun globals.
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["src/**/*.ts", "openapi-ts.config.ts", "tsdown.config.ts"]
+}

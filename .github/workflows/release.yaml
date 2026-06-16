@@ -1,0 +1,88 @@
+name: Release
+
+# Self-updating package: the daily `update-discord-openapi` workflow vendors the
+# spec, auto-merges additive changes, and this workflow publishes on that merge.
+# The version is derived from the spec (see scripts/compute-version.ts).
+on:
+  push:
+    branches: [main]
+    paths:
+      - specs/discord-api.openapi.json
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write # create git tags and GitHub releases
+  id-token: write # npm Trusted Publishing (OIDC)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.19
+
+      # Node + npm (>=11.5.1) for OIDC Trusted Publishing with provenance.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: bun install --frozen-lockfile
+
+      - name: Generate client + build
+        run: |
+          bun run generate:client
+          bun run build
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Compute next version
+        id: version
+        run: echo "version=$(bun scripts/compute-version.ts)" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if already published
+        id: check
+        run: |
+          if npm view "@photon-ai/discord-ts@${{ steps.version.outputs.version }}" version >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set package version
+        if: steps.check.outputs.publish == 'true'
+        working-directory: packages/discord-ts
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version
+
+      - name: Publish to npm
+        if: steps.check.outputs.publish == 'true'
+        working-directory: packages/discord-ts
+        run: npm publish --provenance --access public
+        env:
+          # OIDC Trusted Publishing is preferred; NPM_TOKEN is an optional fallback.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag and create GitHub release
+        if: steps.check.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "Automated release of @photon-ai/discord-ts@${VERSION} from the Discord OpenAPI spec."
