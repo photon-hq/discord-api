@@ -24,20 +24,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Full history + tags so compute-version can diff the spec against the
+          # last release tag (git show v<version>:specs/...).
           fetch-depth: 0
+          fetch-tags: true
 
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.19
 
-      # Node + npm (>=11.5.1) for OIDC Trusted Publishing with provenance.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-
       - run: bun install --frozen-lockfile
 
+      # Run the full pipeline as a release gate so a broken build can never reach
+      # npm. The publish block below re-runs install + build in the package dir.
       - name: Generate client + build
         run: |
           bun run generate:client
@@ -49,40 +48,38 @@ jobs:
       - name: Test
         run: bun run test
 
+      # Writes version / should_publish / discord_version / published_version to
+      # $GITHUB_OUTPUT. should_publish is false when the spec is unchanged since
+      # the last release tag, making re-runs on an unchanged commit a no-op.
       - name: Compute next version
         id: version
-        run: echo "version=$(bun scripts/compute-version.ts)" >> "$GITHUB_OUTPUT"
-
-      - name: Skip if already published
-        id: check
-        run: |
-          if npm view "@photon-ai/discord-ts@${{ steps.version.outputs.version }}" version >/dev/null 2>&1; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
+        run: bun run compute:version
 
       - name: Set package version
-        if: steps.check.outputs.publish == 'true'
+        if: steps.version.outputs.should_publish == 'true'
         working-directory: packages/discord-ts
-        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version
+        run: npm pkg set version=${{ steps.version.outputs.version }}
 
+      # buildspace publish-npm: OIDC Trusted Publishing + provenance, NPM_TOKEN
+      # fallback, and a post-publish check that the version landed on the
+      # registry. Runs its own install + build in the package dir.
       - name: Publish to npm
-        if: steps.check.outputs.publish == 'true'
-        working-directory: packages/discord-ts
-        run: npm publish --provenance --access public
-        env:
-          # OIDC Trusted Publishing is preferred; NPM_TOKEN is an optional fallback.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.version.outputs.should_publish == 'true'
+        uses: photon-hq/buildspace/.github/blocks/publish-npm@main
+        with:
+          bun-version: 1.2.19
+          working-directory: packages/discord-ts
+          build-command: bun run build
+          tag: latest
+          npm-token: ${{ secrets.NPM_TOKEN }}
 
-      - name: Tag and create GitHub release
-        if: steps.check.outputs.publish == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          git tag "v${VERSION}"
-          git push origin "v${VERSION}"
-          gh release create "v${VERSION}" \
-            --title "v${VERSION}" \
-            --notes "Automated release of @photon-ai/discord-ts@${VERSION} from the Discord OpenAPI spec."
+      # buildspace create-github-release: creates the `v<version>` tag + Release
+      # at this commit (which compute-version diffs the spec against next run).
+      - name: Tag + GitHub Release
+        if: steps.version.outputs.should_publish == 'true'
+        uses: photon-hq/buildspace/.github/blocks/create-github-release@main
+        with:
+          version: ${{ steps.version.outputs.version }}
+          title: v${{ steps.version.outputs.version }}
+          notes: "Discord API v${{ steps.version.outputs.discord_version }} — published `@photon-ai/discord-ts@${{ steps.version.outputs.version }}`."
+          tag-prefix: v
