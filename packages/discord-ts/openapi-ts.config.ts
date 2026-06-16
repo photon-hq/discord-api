@@ -33,6 +33,13 @@ export default defineConfig({
       // Validate request bodies and responses at runtime using the generated Zod schemas.
       validator: "zod",
     },
-    "zod",
+    {
+      name: "zod",
+      dates: {
+        // Emit z.iso.datetime({ offset: true }) so validation accepts Discord's
+        // timestamps with timezone offsets (e.g. +00:00), not just `Z`.
+        offset: true,
+      },
+    },
   ],
 });
