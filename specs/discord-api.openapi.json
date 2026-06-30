@@ -6751,6 +6751,7 @@
             "type": "string"
           },
           "rate_limit_per_user": {
+            "format": "int32",
             "maximum": 21600,
             "minimum": 0,
             "type": [
@@ -7277,6 +7278,7 @@
             "type": "string"
           },
           "rate_limit_per_user": {
+            "format": "int32",
             "maximum": 21600,
             "minimum": 0,
             "type": [
@@ -7314,6 +7316,7 @@
             "type": "string"
           },
           "rate_limit_per_user": {
+            "format": "int32",
             "maximum": 21600,
             "minimum": 0,
             "type": [
@@ -10167,6 +10170,11 @@
             "title": "RAID_ALERTS_DISABLED"
           },
           {
+            "const": "PRUNE_REQUIRES_ADMIN",
+            "description": "guild has restricted member prune to administrators and the guild owner",
+            "title": "PRUNE_REQUIRES_ADMIN"
+          },
+          {
             "const": "ROLE_ICONS",
             "description": "guild is able to set role icons",
             "title": "ROLE_ICONS"
@@ -10443,6 +10451,12 @@
           },
           "target_application": {
             "$ref": "#/components/schemas/InviteApplicationResponse"
+          },
+          "target_channel_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          },
+          "target_message_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
           },
           "target_type": {
             "$ref": "#/components/schemas/InviteTargetTypes"
@@ -15525,6 +15539,12 @@
             "$ref": "#/components/schemas/SnowflakeType"
           },
           "is_remix": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "is_spoiler": {
             "type": [
               "boolean",
               "null"
@@ -23994,6 +24014,7 @@
             ]
           },
           "rate_limit_per_user": {
+            "format": "int32",
             "maximum": 21600,
             "minimum": 0,
             "type": [
@@ -38388,6 +38409,20 @@
           {
             "in": "query",
             "name": "guild_scheduled_event_id",
+            "schema": {
+              "$ref": "#/components/schemas/SnowflakeType"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target_channel_id",
+            "schema": {
+              "$ref": "#/components/schemas/SnowflakeType"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target_message_id",
             "schema": {
               "$ref": "#/components/schemas/SnowflakeType"
             }
