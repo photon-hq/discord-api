@@ -10432,6 +10432,16 @@
           "is_nickname_changeable": {
             "type": "boolean"
           },
+          "liveliness": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GuildLivelinessResponse"
+              }
+            ]
+          },
           "max_age": {
             "format": "int32",
             "type": "integer"
@@ -10626,6 +10636,28 @@
             "type": "integer"
           }
         },
+        "type": "object"
+      },
+      "GuildLivelinessResponse": {
+        "properties": {
+          "last_updated_ts": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "msg_activity_bins": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "msg_activity_bins"
+        ],
         "type": "object"
       },
       "GuildMFALevel": {
@@ -32872,26 +32904,6 @@
               }
             }
           },
-          "204": {
-            "description": "204 response for bulk_ban_users_from_guild",
-            "headers": {
-              "X-RateLimit-Bucket": {
-                "$ref": "#/components/headers/X-RateLimit-Bucket"
-              },
-              "X-RateLimit-Limit": {
-                "$ref": "#/components/headers/X-RateLimit-Limit"
-              },
-              "X-RateLimit-Remaining": {
-                "$ref": "#/components/headers/X-RateLimit-Remaining"
-              },
-              "X-RateLimit-Reset": {
-                "$ref": "#/components/headers/X-RateLimit-Reset"
-              },
-              "X-RateLimit-Reset-After": {
-                "$ref": "#/components/headers/X-RateLimit-Reset-After"
-              }
-            }
-          },
           "429": {
             "$ref": "#/components/responses/ClientRatelimitedResponse"
           },
@@ -40128,6 +40140,7 @@
                   },
                   "external_auth_token": {
                     "maxLength": 10240,
+                    "minLength": 1,
                     "type": "string"
                   },
                   "external_auth_type": {
@@ -40191,6 +40204,7 @@
                 "properties": {
                   "external_user_id": {
                     "maxLength": 1024,
+                    "minLength": 1,
                     "type": "string"
                   }
                 },
@@ -40258,6 +40272,7 @@
                   },
                   "external_auth_token": {
                     "maxLength": 10240,
+                    "minLength": 1,
                     "type": "string"
                   },
                   "external_auth_type": {
