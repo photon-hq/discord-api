@@ -762,6 +762,19 @@
               "null"
             ]
           },
+          "file_types": {
+            "items": {
+              "maxLength": 16,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": [
+              "array",
+              "null"
+            ],
+            "uniqueItems": true
+          },
           "name": {
             "maxLength": 32,
             "minLength": 1,
@@ -821,6 +834,14 @@
           },
           "description_localized": {
             "type": "string"
+          },
+          "file_types": {
+            "items": {
+              "maxLength": 16,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
           },
           "name": {
             "type": "string"
@@ -3703,6 +3724,9 @@
           "bot_require_code_grant": {
             "type": "boolean"
           },
+          "conjure_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          },
           "cover_image": {
             "type": "string"
           },
@@ -3790,6 +3814,9 @@
           },
           "verify_key": {
             "type": "string"
+          },
+          "vibegrations_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
           }
         },
         "required": [
@@ -3798,9 +3825,9 @@
           "icon",
           "description",
           "type",
-          "verify_key",
           "flags",
-          "flags_new"
+          "flags_new",
+          "verify_key"
         ],
         "type": "object"
       },
@@ -4050,6 +4077,11 @@
             "title": "CHANNEL_OVERWRITE_DELETE"
           },
           {
+            "const": 16,
+            "description": "Channels were reordered",
+            "title": "CHANNEL_POSITION_UPDATE"
+          },
+          {
             "const": 20,
             "title": "MEMBER_KICK"
           },
@@ -4096,6 +4128,11 @@
           {
             "const": 32,
             "title": "ROLE_DELETE"
+          },
+          {
+            "const": 33,
+            "description": "Roles were reordered",
+            "title": "ROLE_POSITION_UPDATE"
           },
           {
             "const": 40,
@@ -4839,6 +4876,13 @@
           "description": {
             "type": "string"
           },
+          "flags": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "flags_new": {
+            "type": "string"
+          },
           "icon": {
             "type": [
               "string",
@@ -4870,7 +4914,9 @@
           "name",
           "icon",
           "description",
-          "type"
+          "type",
+          "flags",
+          "flags_new"
         ],
         "type": "object"
       },
@@ -4976,6 +5022,9 @@
           "activity": {
             "$ref": "#/components/schemas/MessageActivityResponse"
           },
+          "actor": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
           "application": {
             "$ref": "#/components/schemas/BasicApplicationResponseWithBot"
           },
@@ -5063,6 +5112,9 @@
                 "$ref": "#/components/schemas/ModalSubmitInteractionMetadataResponse"
               }
             ]
+          },
+          "lobby_member": {
+            "$ref": "#/components/schemas/MessageLobbyMemberResponse"
           },
           "mention_channels": {
             "items": {
@@ -5384,6 +5436,14 @@
       },
       "BulkLobbyMemberRequest": {
         "properties": {
+          "additional_name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "flags": {
             "oneOf": [
               {
@@ -6434,6 +6494,10 @@
             "title": "INSTAGRAM"
           },
           {
+            "const": "letterboxd",
+            "title": "LETTERBOXD"
+          },
+          {
             "const": "mastodon",
             "title": "MASTODON"
           },
@@ -6698,6 +6762,18 @@
         ],
         "type": "object"
       },
+      "ContentScanMetadataResponse": {
+        "properties": {
+          "flags": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "flags"
+        ],
+        "type": "object"
+      },
       "CreateEntitlementRequestData": {
         "properties": {
           "owner_id": {
@@ -6769,7 +6845,7 @@
       "CreateGroupDMInviteRequest": {
         "properties": {
           "max_age": {
-            "maximum": 604800,
+            "maximum": 2592000,
             "minimum": 1,
             "type": [
               "integer",
@@ -7047,6 +7123,25 @@
               },
               {
                 "$ref": "#/components/schemas/SnowflakeType"
+              }
+            ]
+          },
+          "target_user_ids": {
+            "description": "The IDs of the users to target with this invite.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeType"
+                },
+                "maxItems": 1000,
+                "type": "array",
+                "uniqueItems": true
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -8773,6 +8868,19 @@
             "minLength": 1,
             "type": "string"
           },
+          "file_types": {
+            "items": {
+              "maxLength": 16,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": [
+              "array",
+              "null"
+            ],
+            "uniqueItems": true
+          },
           "id": {
             "format": "int32",
             "minimum": 0,
@@ -10432,16 +10540,6 @@
           "is_nickname_changeable": {
             "type": "boolean"
           },
-          "liveliness": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/GuildLivelinessResponse"
-              }
-            ]
-          },
           "max_age": {
             "format": "int32",
             "type": "integer"
@@ -10636,28 +10734,6 @@
             "type": "integer"
           }
         },
-        "type": "object"
-      },
-      "GuildLivelinessResponse": {
-        "properties": {
-          "last_updated_ts": {
-            "format": "date-time",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "msg_activity_bins": {
-            "items": {
-              "format": "int32",
-              "type": "integer"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "msg_activity_bins"
-        ],
         "type": "object"
       },
       "GuildMFALevel": {
@@ -13238,6 +13314,13 @@
           "description": {
             "type": "string"
           },
+          "flags": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "flags_new": {
+            "type": "string"
+          },
           "icon": {
             "type": [
               "string",
@@ -13269,7 +13352,9 @@
           "name",
           "icon",
           "description",
-          "type"
+          "type",
+          "flags",
+          "flags_new"
         ],
         "type": "object"
       },
@@ -13577,6 +13662,9 @@
           "bot_require_code_grant": {
             "type": "boolean"
           },
+          "conjure_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          },
           "cover_image": {
             "type": "string"
           },
@@ -13664,6 +13752,9 @@
           },
           "verify_key": {
             "type": "string"
+          },
+          "vibegrations_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
           }
         },
         "required": [
@@ -13672,9 +13763,9 @@
           "icon",
           "description",
           "type",
-          "verify_key",
           "flags",
-          "flags_new"
+          "flags_new",
+          "verify_key"
         ],
         "type": "object"
       },
@@ -13713,6 +13804,9 @@
               "string",
               "null"
             ]
+          },
+          "nsfw": {
+            "type": "boolean"
           },
           "recipients": {
             "items": {
@@ -14397,6 +14491,14 @@
       },
       "LobbyMemberRequest": {
         "properties": {
+          "additional_name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "flags": {
             "oneOf": [
               {
@@ -14432,6 +14534,9 @@
       },
       "LobbyMemberResponse": {
         "properties": {
+          "additional_name": {
+            "type": "string"
+          },
           "flags": {
             "format": "int32",
             "type": "integer"
@@ -14479,6 +14584,9 @@
           },
           "lobby_id": {
             "$ref": "#/components/schemas/SnowflakeType"
+          },
+          "lobby_member": {
+            "$ref": "#/components/schemas/MessageLobbyMemberResponse"
           },
           "metadata": {
             "additionalProperties": {
@@ -14833,7 +14941,7 @@
           },
           "items": {
             "items": {
-              "$ref": "#/components/schemas/MediaGalleryItemRequest"
+              "$ref": "#/components/schemas/MediaGalleryItemForMessageRequest"
             },
             "maxItems": 10,
             "minItems": 1,
@@ -14890,7 +14998,7 @@
         ],
         "type": "object"
       },
-      "MediaGalleryItemRequest": {
+      "MediaGalleryItemForMessageRequest": {
         "properties": {
           "description": {
             "maxLength": 1024,
@@ -15562,6 +15670,7 @@
           },
           "filename": {
             "maxLength": 1024,
+            "minLength": 1,
             "type": [
               "string",
               "null"
@@ -15569,12 +15678,6 @@
           },
           "id": {
             "$ref": "#/components/schemas/SnowflakeType"
-          },
-          "is_remix": {
-            "type": [
-              "boolean",
-              "null"
-            ]
           },
           "is_spoiler": {
             "type": [
@@ -16111,6 +16214,24 @@
         },
         "type": "object"
       },
+      "MessageEmbedAudioResponse": {
+        "properties": {
+          "content_type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "proxy_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "MessageEmbedAuthorResponse": {
         "properties": {
           "icon_url": {
@@ -16219,6 +16340,9 @@
       },
       "MessageEmbedResponse": {
         "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/MessageEmbedAudioResponse"
+          },
           "author": {
             "$ref": "#/components/schemas/MessageEmbedAuthorResponse"
           },
@@ -16338,6 +16462,17 @@
           "id",
           "type",
           "name"
+        ],
+        "type": "object"
+      },
+      "MessageLobbyMemberResponse": {
+        "properties": {
+          "additional_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "additional_name"
         ],
         "type": "object"
       },
@@ -16528,6 +16663,9 @@
           "activity": {
             "$ref": "#/components/schemas/MessageActivityResponse"
           },
+          "actor": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
           "application": {
             "$ref": "#/components/schemas/BasicApplicationResponseWithBot"
           },
@@ -16615,6 +16753,9 @@
                 "$ref": "#/components/schemas/ModalSubmitInteractionMetadataResponse"
               }
             ]
+          },
+          "lobby_member": {
+            "$ref": "#/components/schemas/MessageLobbyMemberResponse"
           },
           "mention_channels": {
             "items": {
@@ -18107,6 +18248,18 @@
         ],
         "type": "object"
       },
+      "PermissionsResponse": {
+        "properties": {
+          "permissions": {
+            "description": "The computed permissions, as a stringified bitfield",
+            "type": "string"
+          }
+        },
+        "required": [
+          "permissions"
+        ],
+        "type": "object"
+      },
       "PinnedMessageResponse": {
         "properties": {
           "message": {
@@ -18551,6 +18704,9 @@
           "bot_require_code_grant": {
             "type": "boolean"
           },
+          "conjure_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          },
           "cover_image": {
             "type": "string"
           },
@@ -18560,6 +18716,12 @@
           },
           "description": {
             "type": "string"
+          },
+          "eligible_oauth2_scopes": {
+            "items": {
+              "$ref": "#/components/schemas/OAuth2Scopes"
+            },
+            "type": "array"
           },
           "event_webhooks_status": {
             "$ref": "#/components/schemas/ApplicationEventWebhooksStatus"
@@ -18711,6 +18873,9 @@
           },
           "verify_key": {
             "type": "string"
+          },
+          "vibegrations_project_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
           }
         },
         "required": [
@@ -18719,9 +18884,9 @@
           "icon",
           "description",
           "type",
-          "verify_key",
           "flags",
           "flags_new",
+          "verify_key",
           "redirect_uris",
           "interactions_endpoint_url",
           "role_connections_verification_url",
@@ -18730,7 +18895,8 @@
           "approximate_user_install_count",
           "approximate_user_authorization_count",
           "explicit_content_filter",
-          "team"
+          "team",
+          "eligible_oauth2_scopes"
         ],
         "type": "object"
       },
@@ -19700,6 +19866,16 @@
       },
       "RichEmbed": {
         "properties": {
+          "audio": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RichEmbedAudio"
+              }
+            ]
+          },
           "author": {
             "oneOf": [
               {
@@ -19812,6 +19988,26 @@
               {
                 "$ref": "#/components/schemas/RichEmbedVideo"
               }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "RichEmbedAudio": {
+        "properties": {
+          "description": {
+            "maxLength": 4096,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "format": "uri",
+            "maxLength": 2048,
+            "type": [
+              "string",
+              "null"
             ]
           }
         },
@@ -20758,6 +20954,9 @@
           "activity": {
             "$ref": "#/components/schemas/MessageActivityResponse"
           },
+          "actor": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
           "application": {
             "$ref": "#/components/schemas/BasicApplicationResponseWithBot"
           },
@@ -20772,6 +20971,10 @@
           },
           "author": {
             "$ref": "#/components/schemas/UserResponse"
+          },
+          "author_restriction_count": {
+            "format": "int32",
+            "type": "integer"
           },
           "call": {
             "$ref": "#/components/schemas/MessageCallResponse"
@@ -20827,6 +21030,9 @@
             "format": "int32",
             "type": "integer"
           },
+          "forward_source_author_id": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          },
           "hit": {
             "type": "boolean"
           },
@@ -20848,6 +21054,9 @@
                 "$ref": "#/components/schemas/ModalSubmitInteractionMetadataResponse"
               }
             ]
+          },
+          "lobby_member": {
+            "$ref": "#/components/schemas/MessageLobbyMemberResponse"
           },
           "mention_channels": {
             "items": {
@@ -20927,11 +21136,19 @@
           "resolved": {
             "$ref": "#/components/schemas/ResolvedObjectsResponse"
           },
+          "restriction_count": {
+            "format": "int32",
+            "type": "integer"
+          },
           "role_subscription_data": {
             "$ref": "#/components/schemas/MessageRoleSubscriptionDataResponse"
           },
           "shared_client_theme": {
             "$ref": "#/components/schemas/CustomClientThemeResponse"
+          },
+          "source_author_restriction_count": {
+            "format": "int32",
+            "type": "integer"
           },
           "sticker_items": {
             "items": {
@@ -23405,11 +23622,18 @@
           "attachment_id": {
             "$ref": "#/components/schemas/SnowflakeType"
           },
+          "content_scan_metadata": {
+            "$ref": "#/components/schemas/ContentScanMetadataResponse"
+          },
           "content_type": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "flags": {
+            "format": "int32",
+            "type": "integer"
           },
           "height": {
             "format": "int32",
@@ -23420,6 +23644,19 @@
           },
           "id": {
             "$ref": "#/components/schemas/SnowflakeType"
+          },
+          "placeholder": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "placeholder_version": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "proxy_url": {
             "type": "string"
@@ -23437,8 +23674,7 @@
         },
         "required": [
           "id",
-          "url",
-          "proxy_url"
+          "url"
         ],
         "type": "object"
       },
@@ -29063,6 +29299,9 @@
         "security": [
           {
             "BotToken": []
+          },
+          {
+            "OAuth2": []
           }
         ]
       },
@@ -30139,6 +30378,152 @@
           }
         ]
       }
+    },
+    "/channels/{channel_id}/permissions/member/{user_id}": {
+      "get": {
+        "description": "Returns the fully cascaded permissions for a member in this channel, applying their roles and the channel's permission overwrites.",
+        "operationId": "get_channel_member_permissions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "implicit",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionsResponse"
+                }
+              }
+            },
+            "description": "200 response for get_channel_member_permissions",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "channel_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        },
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        }
+      ]
+    },
+    "/channels/{channel_id}/permissions/role/{role_id}": {
+      "get": {
+        "description": "Returns the permissions a role grants in this channel, applying the channel's permission overwrites on top of the role's guild-level permissions.",
+        "operationId": "get_channel_role_permissions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "implicit",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionsResponse"
+                }
+              }
+            },
+            "description": "200 response for get_channel_role_permissions",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "channel_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        },
+        {
+          "in": "path",
+          "name": "role_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        }
+      ]
     },
     "/channels/{channel_id}/permissions/{overwrite_id}": {
       "delete": {
@@ -33741,8 +34126,7 @@
             "in": "query",
             "name": "after",
             "schema": {
-              "minimum": 0,
-              "type": "integer"
+              "$ref": "#/components/schemas/SnowflakeType"
             }
           }
         ],
@@ -33834,7 +34218,7 @@
                     ]
                   },
                   "bio": {
-                    "maxLength": 190,
+                    "maxLength": 300,
                     "type": [
                       "string",
                       "null"
@@ -34696,6 +35080,9 @@
         "security": [
           {
             "BotToken": []
+          },
+          {
+            "OAuth2": []
           }
         ]
       },
@@ -34892,6 +35279,134 @@
           }
         ]
       }
+    },
+    "/guilds/{guild_id}/permissions/member/{user_id}": {
+      "get": {
+        "description": "Returns the fully cascaded guild-level permissions for a member, applying all of their roles including @everyone's",
+        "operationId": "get_guild_member_permissions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionsResponse"
+                }
+              }
+            },
+            "description": "200 response for get_guild_member_permissions",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "guild_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        },
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        }
+      ]
+    },
+    "/guilds/{guild_id}/permissions/role/{role_id}": {
+      "get": {
+        "description": "Returns the permissions a role grants at the guild level, combining the role's own permissions with @everyone's.",
+        "operationId": "get_guild_role_permissions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionsResponse"
+                }
+              }
+            },
+            "description": "200 response for get_guild_role_permissions",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "guild_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        },
+        {
+          "in": "path",
+          "name": "role_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        }
+      ]
     },
     "/guilds/{guild_id}/preview": {
       "get": {
@@ -38619,6 +39134,154 @@
         ]
       }
     },
+    "/invites/{code}/target-users/bulk-add": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "code",
+          "required": true,
+          "schema": {
+            "maxLength": 152133,
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Add multiple target users to an existing invite.",
+        "operationId": "bulk_add_invite_target_users",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "user_ids": {
+                    "description": "The IDs of the users to target.",
+                    "items": {
+                      "$ref": "#/components/schemas/SnowflakeType"
+                    },
+                    "maxItems": 1000,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "user_ids"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "204 response for bulk_add_invite_target_users",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      }
+    },
+    "/invites/{code}/target-users/bulk-delete": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "code",
+          "required": true,
+          "schema": {
+            "maxLength": 152133,
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Remove multiple target users from an existing invite.",
+        "operationId": "bulk_remove_invite_target_users",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "user_ids": {
+                    "description": "The IDs of the users to stop targeting.",
+                    "items": {
+                      "$ref": "#/components/schemas/SnowflakeType"
+                    },
+                    "maxItems": 1000,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "user_ids"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "204 response for bulk_remove_invite_target_users",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      }
+    },
     "/invites/{code}/target-users/job-status": {
       "get": {
         "description": "Get the target users job status for an invite.",
@@ -38676,6 +39339,101 @@
         }
       ]
     },
+    "/invites/{code}/target-users/{user_id}": {
+      "delete": {
+        "description": "Remove a target user from an existing invite.",
+        "operationId": "remove_invite_target_user",
+        "responses": {
+          "204": {
+            "description": "204 response for remove_invite_target_user",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "code",
+          "required": true,
+          "schema": {
+            "maxLength": 152133,
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/SnowflakeType"
+          }
+        }
+      ],
+      "put": {
+        "description": "Add a target user to an existing invite.",
+        "operationId": "add_invite_target_user",
+        "responses": {
+          "204": {
+            "description": "204 response for add_invite_target_user",
+            "headers": {
+              "X-RateLimit-Bucket": {
+                "$ref": "#/components/headers/X-RateLimit-Bucket"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              },
+              "X-RateLimit-Reset-After": {
+                "$ref": "#/components/headers/X-RateLimit-Reset-After"
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/ClientRatelimitedResponse"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "BotToken": []
+          }
+        ]
+      }
+    },
     "/lobbies": {
       "post": {
         "operationId": "create_lobby",
@@ -38724,6 +39482,14 @@
                     "maxProperties": 25,
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": [
+                      "string",
                       "null"
                     ]
                   },
@@ -38831,6 +39597,14 @@
                     "maxProperties": 25,
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": [
+                      "string",
                       "null"
                     ]
                   },
@@ -39031,6 +39805,14 @@
                     "maxProperties": 25,
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": [
+                      "string",
                       "null"
                     ]
                   },
@@ -39421,6 +40203,14 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "additional_name": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "flags": {
                     "oneOf": [
                       {
@@ -41639,6 +42429,14 @@
             "schema": {
               "maximum": 200,
               "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shard",
+            "schema": {
+              "minimum": 0,
               "type": "integer"
             }
           },
