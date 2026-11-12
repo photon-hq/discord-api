@@ -2,7 +2,7 @@
   "name": "@photon-ai/discord-ts",
   "version": "10.0.0",
   "description": "A typed TypeScript client with Zod schemas for the Discord HTTP API, generated from the official OpenAPI spec.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=18"
